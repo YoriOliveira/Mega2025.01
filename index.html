@@ -1,0 +1,905 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>DESENVOLVIDO POR FRANK OLIVRIRA — Todos os direitos reservados ao desenvolvedor(9 jogos por bilhete)</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background:#f8fafc; color:#0f172a; font-family: Inter, system-ui; padding:20px }
+    .ticket { background:#fff; border-radius:10px; box-shadow:0 2px 8px rgba(15,23,42,0.06); padding:12px; margin-bottom:12px }
+    .num-input { width:50px; text-align:center; font-weight:600 }
+    .match { background:#16a34a !important; color:white !important }
+    .controls { position:sticky; top:0; background:white; padding:10px; z-index:10; border-bottom:1px solid #e2e8f0 }
+    .games-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(390px, 1fr)); gap:12px }
+    .small {
+    font-size: 0.85rem;
+    color: #475569;
+    text-align: left;
+}
+  </style>
+</head>
+<body>
+
+  <div class="controls mb-3">
+    <div class="row g-2">
+      <div class="col-auto"><strong>Números sorteados:</strong></div>
+      <div class="col-auto">
+        <div class="d-flex gap-2">
+          <input class="form-control form-control-sm draw" type="number" min="1" max="60" placeholder="01">
+          <input class="form-control form-control-sm draw" type="number" min="1" max="60" placeholder="02">
+          <input class="form-control form-control-sm draw" type="number" min="1" max="60" placeholder="03">
+          <input class="form-control form-control-sm draw" type="number" min="1" max="60" placeholder="04">
+          <input class="form-control form-control-sm draw" type="number" min="1" max="60" placeholder="05">
+          <input class="form-control form-control-sm draw" type="number" min="1" max="60" placeholder="06">
+        </div>
+      </div>
+      <div class="col-auto">
+        <button id="checkBtn" class="btn btn-primary btn-sm">Conferir</button>
+        <button id="resetBtn" class="btn btn-secondary btn-sm">Limpar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="mb-2 small">
+    <ul>
+      <li>Bilhetes gerados: 1000 — cada um com 9 jogos. Os dois primeiros jogos do Bilhete #1 já estão preenchidos.</li>
+    </ul>
+  </div>
+
+  <div id="tickets" class="games-grid"></div>
+
+  <script>
+    const NUM_TICKETS = 39;
+    const GAMES = 9;
+
+  // Jogos fornecidos
+  
+    // Bilhete 01
+    const preset1 = [05,17,22,40,45,49];
+    const preset2 = [10,13,19,23,37,55];
+    const preset3 = [01,17,24,49,51,57];
+    const preset4 = [01,06,18,22,35,40];
+    const preset5 = [04,09,17,35,42,60];
+    const preset6 = [01,05,09,43,47,50];
+    const preset7 = [08,11,12,24,46,55];
+    const preset8 = [02,04,10,14,24,28];
+    const preset9 = [07,08,12,21,22,23];
+    // Bilhete 02
+    const preset10 = [15,26,41,44,58,59];
+    const preset11 = [02,03,05,27,31,50];
+    const preset12 = [01,06,28,39,40,54];
+    const preset13 = [02,03,13,15,23,33];
+    const preset14 = [11,21,41,42,47,53];
+    const preset15 = [06,14,24,26,36,58];
+    const preset16 = [08,10,14,27,28,29];
+    const preset17 = [22,31,42,44,47,58];
+    const preset18 = [16,21,33,42,46,51];  
+    // Bilhete 03
+    const preset19 = [10,18,22,26,44,60];
+    const preset20 = [02,09,11,16,24,30];
+    const preset21 = [01,08,13,15,22,29];
+    const preset22 = [12,43,48,49,53,57];
+    const preset23 = [14,18,27,34,43,55];
+    const preset24 = [13,15,26,27,33,37];
+    const preset25 = [05,17,24,31,46,49];
+    const preset26 = [07,08,14,27,48,57];
+    const preset27 = [02,16,24,38,42,54];
+    // Bilhete 04
+    const preset28 = [13,27,28,33,45,51];
+    const preset29 = [02,08,25,32,44,58];
+    const preset30 = [01,07,09,10,17,19];
+    const preset31 = [05,17,20,23,37,43];
+    const preset32 = [02,16,22,24,26,38];
+    const preset33 = [05,06,14,18,25,36];
+    const preset34 = [02,12,14,17,22,27];
+    const preset35 = [03,08,09,14,16,21];
+    const preset36 = [08,10,16,23,34,40];
+    // Bilhete 05
+    const preset37 = [21,27,40,43,45,57];
+    const preset38 = [08,09,13,17,23,26];
+    const preset39 = [09,13,43,54,56,57];
+    const preset40 = [17,22,23,25,29,33];
+    const preset41 = [16,21,33,42,46,51];
+    const preset42 = [02,05,06,38,42,57];
+    const preset43 = [07,15,17,22,23,58];
+    const preset44 = [01,03,10,14,33,46];
+    const preset45 = [06,07,12,17,20,26];
+    // Bilhete 06
+    const preset46 = [04,08,21,33,46,57];
+    const preset47 = [01,12,26,38,51,59];
+    const preset48 = [10,15,34,42,55,60];
+    const preset49 = [02,27,30,52,55,57];
+    const preset50 = [04,07,26,29,44,48];
+    const preset51 = [12,15,18,21,41,57];
+    const preset52 = [02,08,15,18,38,47];
+    const preset53 = [13,32,35,36,39,46];
+    const preset54 = [27,31,43,49,53,58];
+    // Bilhete 07
+    const preset55 = [17,18,21,36,39,56];
+    const preset56 = [04,09,37,39,46,57];
+    const preset57 = [09,14,27,33,56,58];
+    const preset58 = [02,09,15,36,43,58];
+    const preset59 = [03,09,12,13,14,20];
+    const preset60 = [07,18,25,28,45,47];
+    const preset61 = [04,06,12,29,34,41];
+    const preset62 = [12,29,34,41,44,46];
+    const preset63 = [02,04,21,39,44,46];
+    // Bilhete 08
+    const preset64 = [08,10,14,27,28,29];
+    const preset65 = [22,31,42,44,47,58];
+    const preset66 = [10,16,26,33,38,49];
+    const preset67 = [03,10,26,32,39,54];
+    const preset68 = [02,08,24,40,42,46];
+    const preset69 = [02,10,25,42,48,50];
+    const preset70 = [18,19,20,26,28,30];
+    const preset71 = [10,16,26,33,38,49];
+    const preset72 = [03,14,22,38,44,56];
+    // Bilhete 09
+    const preset73 = [08,11,27,37,48,52];
+    const preset74 = [22,26,34,42,48,54];
+    const preset75 = [04,10,22,34,56,58];
+    const preset76 = [03,08,11,19,20,22];
+    const preset77 = [02,07,27,36,50,57];
+    const preset78 = [06,16,17,22,26,28];
+    const preset79 = [03,07,22,32,45,60];
+    const preset80 = [01,14,26,29,44,48];
+    const preset81 = [05,10,16,23,25,36];
+    // Bilhete 10
+    const preset82 = [03,19,27,38,52,55];
+    const preset83 = [05,18,21,33,48,57];
+    const preset84 = [09,21,23,47,59,60];
+    const preset85 = [02,12,15,21,22,33];
+    const preset86 = [04,07,12,15,21,23];
+    const preset87 = [18,19,20,26,28,30];
+    const preset88 = [04,12,21,26,47,51];
+    const preset89 = [19,20,21,26,37,43];
+    const preset90 = [08,12,17,26,34,51];
+    // Bilhete 11
+    const preset91 = [10,27,34,47,48,51];
+    const preset92 = [03,17,24,26,31,32];
+    const preset93 = [03,12,27,28,32,60];
+    const preset94 = [02,07,14,24,33,42];
+    const preset95 = [11,12,24,35,38,39];
+    const preset96 = [02,05,14,16,19,46];
+    const preset97 = [08,10,14,27,29,42];
+    const preset98 = [07,13,28,36,44,52];
+    const preset99 = [10,15,22,37,41,56];
+    // Bilhete 12
+    const preset100 = [01,02,12,24,50,59];
+    const preset101 = [07,12,19,25,36,48];
+    const preset102 = [05,11,13,23,29,41];
+    const preset103 = [01,03,04,05,07,08];
+    const preset104 = [07,09,12,23,43,56];
+    const preset105 = [13,14,21,28,34,53];
+    const preset106 = [23,33,38,46,47,50];
+    const preset107 = [01,06,10,16,44,53];
+    const preset108 = [05,12,26,24,47,50];
+    // Bilhete 13
+    const preset109 = [05,11,18,23,27,44];
+    const preset110 = [01,06,34,39,52,57];
+    const preset111 = [05,10,22,36,51,55];
+    const preset112 = [02,22,37,42,46,55];
+    const preset113 = [05,18,32,35,54,57];
+    const preset114 = [01,12,23,38,49,60];
+    const preset115 = [12,20,26,33,40,53];
+    const preset116 = [02,25,38,41,53,58];
+    const preset117 = [05,07,23,29,50,51];
+    // Bilhete 14
+    const preset118 = [13,31,36,39,41,60];
+    const preset119 = [11,15,34,35,39,46];
+    const preset120 = [27,31,43,49,53,58];
+    const preset121 = [04,10,17,22,35,39];
+    const preset122 = [07,11,13,25,41,60];
+    const preset123 = [02,09,31,34,52,57];
+    const preset124 = [05,14,25,34,45,54];
+    const preset125 = [14,16,34,35,36,55];
+    const preset126 = [04,15,26,28,37,46];
+    // Bilhete 15
+    const preset127 = [09,16,17,23,29,32];
+    const preset128 = [03,05,10,20,33,36];
+    const preset129 = [08,15,18,22,31,35];
+    const preset130 = [07,10,17,29,40,44];
+    const preset131 = [01,05,12,25,54,56];
+    const preset132 = [06,13,22,36,59,59];
+    const preset133 = [11,29,33,41,48,55];
+    const preset134 = [02,16,19,21,44,59];
+    const preset135 = [05,17,46,50,51,58];
+    // Bilhete 16
+    const preset136 = [07,12,22,34,39,57];
+    const preset137 = [17,25,27,35,44,48];
+    const preset138 = [14,18,32,48,51,59];
+    const preset139 = [08,12,15,22,27,33];
+    const preset140 = [02,12,15,21,22,33];
+    const preset141 = [04,08,12,15,21,23];
+    const preset142 = [01,09,17,22,26,38];
+    const preset143 = [11,12,14,22,44,60];
+    const preset144 = [04,05,10,33,42,53];
+    // Bilhete 17
+    const preset145 = [01,19,23,28,37,44];
+    const preset146 = [08,26,34,47,52,59];
+    const preset147 = [10,29,31,38,44,57];
+    const preset148 = [10,18,21,30,44,54];
+    const preset149 = [14,19,22,26,30,60];
+    const preset150 = [05,07,48,51,52,54];
+    const preset151 = [03,12,15,21,26,28];
+    const preset152 = [05,19,27,38,44,56];
+    const preset153 = [05,12,26,33,49,57];
+    // Bilhete 18
+    const preset154 = [02,07,08,16,33,47];
+    const preset155 = [03,11,27,34,46,59];
+    const preset156 = [03,08,12,16,21,47];
+    const preset157 = [04,13,24,36,44,51];
+    const preset158 = [04,07,15,25,31,43];
+    const preset159 = [07,09,14,22,23,28];
+    const preset160 = [01,06,12,21,30,36];
+    const preset161 = [02,03,07,09,13,20];
+    const preset162 = [02,10,11,24,25,37];
+    // Bilhete 19
+    const preset163 = [02,05,12,16,20,21];
+    const preset164 = [03,04,10,14,22,23];
+    const preset165 = [06,16,17,22,26,28];
+    const preset166 = [10,12,22,24,36,48];
+    const preset167 = [11,12,24,28,30,45];
+    const preset168 = [04,11,16,34,36,37];
+    const preset169 = [02,06,24,28,42,46];
+    const preset170 = [01,08,25,33,47,51];
+    const preset171 = [05,06,12,18,34,46];
+    // Bilhete 20
+    const preset172 = [06,07,10,11,18,22];
+    const preset173 = [07,09,13,15,17,20];
+    const preset174 = [01,03,06,10,30,38];
+    const preset175 = [03,09,12,13,14,20];
+    const preset176 = [07,18,25,28,45,47];
+    const preset177 = [02,08,15,18,38,47];
+    const preset178 = [03,04,15,17,19,21];
+    const preset179 = [03,08,12,13,14,37];
+    const preset180 = [28,33,36,39,41,45];
+    // Bilhete 21
+    const preset181 = [03,05,08,16,21,28];
+    const preset182 = [11,26,30,40,46,52];
+    const preset183 = [23,33,38,46,47,50];
+    const preset184 = [08,12,15,17,34,36];
+    const preset185 = [04,08,16,24,36,38];
+    const preset186 = [01,05,17,20,24,26];
+    const preset187 = [15,17,23,29,35,38];
+    const preset188 = [08,10,13,15,27,29];
+    const preset189 = [07,14,16,32,34,38];
+    // Bilhete 22
+    const preset190 = [10,18,22,26,44,60];
+    const preset191 = [02,09,11,16,24,30];
+    const preset192 = [01,08,13,15,22,29];
+    const preset193 = [06,23,34,46,54,56];
+    const preset194 = [03,11,17,46,52,56];
+    const preset195 = [12,23,32,46,54,56];
+    const preset196 = [03,07,09,30,56,58];
+    const preset197 = [01,02,17,34,28,56];
+    const preset198 = [02,09,18,46,55,57];
+    // Bilhete 23
+    const preset199 = [02,10,12,21,23,28];
+    const preset200 = [04,06,08,16,21,23];
+    const preset201 = [17,18,21,36,39,56];
+    const preset202 = [18,19,27,30,33,51];
+    const preset203 = [01,05,11,18,19,27];
+    const preset204 = [01,03,05,37,41,53];
+    const preset205 = [07,12,19,25,36,48];
+    const preset206 = [05,11,13,23,29,41];
+    const preset207 = [02,09,15,36,43,58];
+    // Bilhete 24
+    const preset208 = [03,07,14,18,35,36];
+    const preset209 = [10,12,15,20,21,28];
+    const preset210 = [02,07,19,26,39,55];
+    const preset211 = [16,18,21,22,23,48];
+    const preset212 = [11,19,24,51,54,56];
+    const preset213 = [09,11,27,33,39,46];
+    const preset214 = [11,19,26,35,38,49];
+    const preset215 = [07,10,12,34,36,38];
+    const preset216 = [05,06,17,43,44,45];
+    // Bilhete 25
+    const preset217 = [01,05,06,12,26,45];
+    const preset218 = [02,03,13,16,22,33];
+    const preset219 = [15,23,35,46,54,55];
+    const preset220 = [07,19,28,33,45,58];
+    const preset221 = [17,21,45,57,58,60];
+    const preset222 = [06,14,24,37,52,56];
+    const preset223 = [22,27,33,36,44,45];
+    const preset224 = [15,16,24,27,38,43];
+    const preset225 = [03,07,25,37,53,57];
+    // Bilhete 26
+    const preset226 = [22,31,42,44,47,58];
+    const preset227 = [16,21,33,42,46,51];
+    const preset228 = [10,16,26,33,38,49];
+    const preset229 = [04,13,27,35,43,46];
+    const preset230 = [03,05,11,35,49,55];
+    const preset231 = [01,06,13,21,23,31];
+    const preset232 = [03,19,21,26,29,49];
+    const preset233 = [06,08,34,43,45,54];
+    const preset234 = [04,07,27,33,40,52];
+    // Bilhete 27
+    const preset235 = [04,17,32,34,35,39];
+    const preset236 = [03,07,09,35,38,54];
+    const preset237 = [03,06,07,12,56,57];
+    const preset238 = [27,32,37,42,48,49];
+    const preset239 = [04,07,27,46,52,54];
+    const preset240 = [13,25,37,55,59,60];
+    const preset241 = [07,10,16,37,43,58];
+    const preset242 = [04,26,39,47,53,55];
+    const preset243 = [23,33,49,51,57,60];
+    // Bilhete 28
+    const preset244 = [08,10,25,26,27,54];
+    const preset245 = [06,17,22,38,43,46];
+    const preset246 = [02,13,46,47,53,54];
+    const preset247 = [05,16,18,19,22,45];
+    const preset248 = [06,12,15,20,23,26];
+    const preset249 = [07,12,16,31,44,59];
+    const preset250 = [03,10,14,20,26,55];
+    const preset251 = [21,33,35,47,54,59];
+    const preset252 = [16,24,32,54,58,60];
+    // Bilhete 29
+    const preset253 = [01,04,22,34,47,51];
+    const preset254 = [04,12,17,27,33,40];
+    const preset255 = [03,22,27,39,56,59];
+    const preset256 = [06,15,25,34,44,56];
+    const preset257 = [05,14,24,36,46,54];
+    const preset258 = [02,07,08,20,22,41];
+    const preset259 = [03,20,24,44,54,58];
+    const preset260 = [06,12,19,20,27,29];
+    const preset261 = [18,28,33,44,46,54];
+    // Bilhete 30
+    const preset262 = [02,07,11,14,28,29];
+    const preset263 = [02,20,26,55,56,57];
+    const preset264 = [11,12,14,19,56,59];
+    const preset265 = [06,16,24,26,28,30];
+    const preset266 = [09,20,35,36,42,48];
+    const preset267 = [02,07,09,17,24,29];
+    const preset268 = [18,41,42,47,53,58];
+    const preset269 = [13,14,16,36,46,54];
+    const preset270 = [12,20,23,47,53,60];
+    // Bilhete 31
+    const preset271 = [05,20,29,32,49,57];
+    const preset272 = [01,23,27,30,34,60];
+    const preset273 = [04,06,11,21,34,37];
+    const preset274 = [06,10,12,29,41,43];
+    const preset275 = [08,14,22,36,39,52];
+    const preset276 = [01,03,15,27,39,45];
+    const preset277 = [06,14,26,36,46,54];
+    const preset278 = [11,17,19,20,28,35];
+    const preset279 = [13,18,26,36,41,45];
+    // Bilhete 32
+    const preset280 = [02,19,21,33,36,59];
+    const preset281 = [07,10,23,34,48,54];
+    const preset282 = [08,09,32,44,46,58];
+    const preset283 = [08,10,14,27,28,29];
+    const preset284 = [22,31,42,44,47,58];
+    const preset285 = [16,21,33,42,46,51];
+    const preset286 = [04,16,20,34,42,58];
+    const preset287 = [03,12,22,34,56,58];
+    const preset288 = [03,04,12,22,34,56];
+    // Bilhete 33
+    const preset289 = [02,13,21,37,55,60];
+    const preset290 = [06,24,30,55,57,58];
+    const preset291 = [04,09,13,20,41,44];
+    const preset292 = [12,21,33,37,44,56];
+    const preset293 = [02,11,23,36,38,54];
+    const preset294 = [04,12,18,24,35,54];
+    const preset295 = [03,05,12,17,28,33];
+    const preset296 = [07,10,19,21,34,58];
+    const preset297 = [01,10,33,34,46,50];
+    // Bilhete 34
+    const preset298 = [19,20,21,26,37,43];
+    const preset299 = [08,12,17,26,34,51];
+    const preset300 = [03,06,15,19,24,54];
+    const preset301 = [03,06,22,24,29,41];
+    const preset302 = [02,17,20,22,24,46];
+    const preset303 = [01,03,04,09,34,37];
+    const preset304 = [02,07,09,12,14,27];
+    const preset305 = [02,09,12,13,14,20];
+    const preset306 = [01,03,05,15,26,28];
+    // Bilhete 35
+    const preset307 = [02,11,23,28,35,39];
+    const preset308 = [08,10,13,14,27,29];
+    const preset309 = [15,22,38,44,55,59];
+    const preset310 = [12,16,24,36,53,55];
+    const preset311 = [15,18,33,35,39,49];
+    const preset312 = [05,10,20,30,40,50];
+    const preset313 = [03,07,10,12,17,59];
+    const preset314 = [07,17,21,33,34,58];
+    const preset315 = [05,17,22,43,59,60];
+    // Bilhete 36
+    const preset316 = [05,06,18,30,32,58];
+    const preset317 = [01,07,19,23,45,48];
+    const preset318 = [06,11,29,40,42,55];
+    const preset319 = [05,09,17,26,30,31];
+    const preset320 = [10,16,26,33,38,49];
+    const preset321 = [03,08,09,14,16,21];
+    const preset322 = [06,07,08,23,29,41];
+    const preset323 = [13,16,33,36,42,58];
+    const preset324 = [11,16,19,26,30,58];
+ // Bilhete 37
+    const preset325 = [02,05,07,22,25,29];
+    const preset326 = [02,07,09,11,14,18];
+    const preset327 = [01,06,17,22,24,35];
+    const preset328 = [01,06,17,22,42,53];
+    const preset329 = [13,28,34,37,38,54];
+    const preset330 = [16,21,27,32,43,56];
+    const preset331 = [02,24,26,27,30,34];
+    const preset332 = [09,12,13,14,20,23];
+    const preset333 = [04,07,13,18,19,25];
+   // Bilhete 38
+    const preset334 = [05,32,35,38,52,58];
+    const preset335 = [01,10,28,35,47,54];
+    const preset336 = [11,21,34,42,52,58];
+    const preset337 = [06,15,29,33,36,54];
+    const preset338 = [02,04,09,19,32,35];
+    const preset339 = [09,12,14,24,57,59];
+    const preset340 = [01,14,18,22,32,40];
+    const preset341 = [17,21,25,36,58,59];
+    const preset342 = [05,19,23,37,42,57];
+ // Bilhete 39
+    const preset343 = [05,08,10,17,23,26];
+    const preset344 = [01,11,27,31,32,33];
+    
+  
+    
+    function pad(n){ return String(n).padStart(2,'0') }
+
+    function createTicket(index){
+      const card = document.createElement('div');
+      card.className = 'ticket';
+
+      card.innerHTML = `<div class='d-flex justify-content-between mb-2'>
+          <strong>Bilhete #${index+1}</strong>
+          <div class='small'>Total acertos: <span class='ticket-total'>0</span></div>
+        </div>`;
+
+      for(let j=0;j<GAMES;j++){
+        const row = document.createElement('div');
+        row.className = 'd-flex align-items-center justify-content-between mb-1';
+
+        let inputs = '';
+        for(let n=0;n<6;n++)
+          inputs += `<input type='number' min='1' max='60' class='form-control form-control-sm num-input'>`;
+
+        row.innerHTML = `
+          <div class='d-flex gap-1 game'>${inputs}</div>
+          <div class='small'>Acertos: <span class='gm'>0</span></div>
+        `;
+
+        // Preencher jogos pré-definidos
+          
+        // Bilhete 01
+        if(index===0 && j===0) fillPreset(row, preset1);
+        if(index===0 && j===1) fillPreset(row, preset2);
+        if(index===0 && j===2) fillPreset(row, preset3);
+        if(index===0 && j===3) fillPreset(row, preset4);
+        if(index===0 && j===4) fillPreset(row, preset5);
+        if(index===0 && j===5) fillPreset(row, preset6);
+        if(index===0 && j===6) fillPreset(row, preset7);
+        if(index===0 && j===7) fillPreset(row, preset8);
+        if(index===0 && j===8) fillPreset(row, preset9);
+        // Bilhete 02
+        if(index===1 && j===0) fillPreset(row, preset10);
+        if(index===1 && j===1) fillPreset(row, preset11);
+        if(index===1 && j===2) fillPreset(row, preset12);
+        if(index===1 && j===3) fillPreset(row, preset13);
+        if(index===1 && j===4) fillPreset(row, preset14);
+        if(index===1 && j===5) fillPreset(row, preset15);
+        if(index===1 && j===6) fillPreset(row, preset16);
+        if(index===1 && j===7) fillPreset(row, preset17);
+        if(index===1 && j===8) fillPreset(row, preset18);
+        // Bilhete 03
+        if(index===2 && j===0) fillPreset(row, preset19);
+        if(index===2 && j===1) fillPreset(row, preset20);
+        if(index===2 && j===2) fillPreset(row, preset21);
+        if(index===2 && j===3) fillPreset(row, preset22);
+        if(index===2 && j===4) fillPreset(row, preset23);
+        if(index===2 && j===5) fillPreset(row, preset24);
+        if(index===2 && j===6) fillPreset(row, preset25);
+        if(index===2 && j===7) fillPreset(row, preset26);
+        if(index===2 && j===8) fillPreset(row, preset27);
+        // Bilhete 04
+        if(index===3 && j===0) fillPreset(row, preset28);
+        if(index===3 && j===1) fillPreset(row, preset29);
+        if(index===3 && j===2) fillPreset(row, preset30);
+        if(index===3 && j===3) fillPreset(row, preset31);
+        if(index===3 && j===4) fillPreset(row, preset32);
+        if(index===3 && j===5) fillPreset(row, preset33);
+        if(index===3 && j===6) fillPreset(row, preset34);
+        if(index===3 && j===7) fillPreset(row, preset35);
+        if(index===3 && j===8) fillPreset(row, preset36);
+        // Bilhete 05
+        if(index===4 && j===0) fillPreset(row, preset37);
+        if(index===4 && j===1) fillPreset(row, preset38);
+        if(index===4 && j===2) fillPreset(row, preset39);
+        if(index===4 && j===3) fillPreset(row, preset40);
+        if(index===4 && j===4) fillPreset(row, preset41);
+        if(index===4 && j===5) fillPreset(row, preset42);
+        if(index===4 && j===6) fillPreset(row, preset43);
+        if(index===4 && j===7) fillPreset(row, preset44);
+        if(index===4 && j===8) fillPreset(row, preset45);
+        // Bilhete 06
+        if(index===5 && j===0) fillPreset(row, preset46);
+        if(index===5 && j===1) fillPreset(row, preset47);
+        if(index===5 && j===2) fillPreset(row, preset48);
+        if(index===5 && j===3) fillPreset(row, preset49);
+        if(index===5 && j===4) fillPreset(row, preset50);
+        if(index===5 && j===5) fillPreset(row, preset51);
+        if(index===5 && j===6) fillPreset(row, preset52);
+        if(index===5 && j===7) fillPreset(row, preset53);
+        if(index===5 && j===8) fillPreset(row, preset54);
+        // Bilhete 07
+        if(index===6 && j===0) fillPreset(row, preset55);
+        if(index===6 && j===1) fillPreset(row, preset56);
+        if(index===6 && j===2) fillPreset(row, preset57);
+        if(index===6 && j===3) fillPreset(row, preset58);
+        if(index===6 && j===4) fillPreset(row, preset59);
+        if(index===6 && j===5) fillPreset(row, preset60);
+        if(index===6 && j===6) fillPreset(row, preset61);
+        if(index===6 && j===7) fillPreset(row, preset62);
+        if(index===6 && j===8) fillPreset(row, preset63);
+        // Bilhete 08
+        if(index===7 && j===0) fillPreset(row, preset64);
+        if(index===7 && j===1) fillPreset(row, preset65);
+        if(index===7 && j===2) fillPreset(row, preset66);
+        if(index===7 && j===3) fillPreset(row, preset67);
+        if(index===7 && j===4) fillPreset(row, preset68);
+        if(index===7 && j===5) fillPreset(row, preset69);
+        if(index===7 && j===6) fillPreset(row, preset70);
+        if(index===7 && j===7) fillPreset(row, preset71);
+        if(index===7 && j===8) fillPreset(row, preset72);
+        // Bilhete 09
+        if(index===8 && j===0) fillPreset(row, preset73);
+        if(index===8 && j===1) fillPreset(row, preset74);
+        if(index===8 && j===2) fillPreset(row, preset75);
+        if(index===8 && j===3) fillPreset(row, preset76);
+        if(index===8 && j===4) fillPreset(row, preset77);
+        if(index===8 && j===5) fillPreset(row, preset78);
+        if(index===8 && j===6) fillPreset(row, preset79);
+        if(index===8 && j===7) fillPreset(row, preset80);
+        if(index===8 && j===8) fillPreset(row, preset81);
+        // Bilhete 10
+        if(index===9 && j===0) fillPreset(row, preset82);
+        if(index===9 && j===1) fillPreset(row, preset83);
+        if(index===9 && j===2) fillPreset(row, preset84);
+        if(index===9 && j===3) fillPreset(row, preset85);
+        if(index===9 && j===4) fillPreset(row, preset86);
+        if(index===9 && j===5) fillPreset(row, preset87);
+        if(index===9 && j===6) fillPreset(row, preset88);
+        if(index===9 && j===7) fillPreset(row, preset89);
+        if(index===9 && j===8) fillPreset(row, preset90);
+        // Bilhete 11
+        if(index===10 && j===0) fillPreset(row, preset91);
+        if(index===10 && j===1) fillPreset(row, preset92);
+        if(index===10 && j===2) fillPreset(row, preset93);
+        if(index===10 && j===3) fillPreset(row, preset94);
+        if(index===10 && j===4) fillPreset(row, preset95);
+        if(index===10 && j===5) fillPreset(row, preset96);
+        if(index===10 && j===6) fillPreset(row, preset97);
+        if(index===10 && j===7) fillPreset(row, preset98);
+        if(index===10 && j===8) fillPreset(row, preset99);
+        // Bilhete 12
+        if(index===11 && j===0) fillPreset(row, preset100);
+        if(index===11 && j===1) fillPreset(row, preset101);
+        if(index===11 && j===2) fillPreset(row, preset102);
+        if(index===11 && j===3) fillPreset(row, preset103);
+        if(index===11 && j===4) fillPreset(row, preset104);
+        if(index===11 && j===5) fillPreset(row, preset105);
+        if(index===11 && j===6) fillPreset(row, preset106);
+        if(index===11 && j===7) fillPreset(row, preset107);
+        if(index===11 && j===8) fillPreset(row, preset108);
+        // Bilhete 13
+        if(index===12 && j===0) fillPreset(row, preset109);
+        if(index===12 && j===1) fillPreset(row, preset110);
+        if(index===12 && j===2) fillPreset(row, preset111);
+        if(index===12 && j===3) fillPreset(row, preset112);
+        if(index===12 && j===4) fillPreset(row, preset113);
+        if(index===12 && j===5) fillPreset(row, preset114);
+        if(index===12 && j===6) fillPreset(row, preset115);
+        if(index===12 && j===7) fillPreset(row, preset116);
+        if(index===12 && j===8) fillPreset(row, preset117);
+        // Bilhete 14
+        if(index===13 && j===0) fillPreset(row, preset118);
+        if(index===13 && j===1) fillPreset(row, preset119);
+        if(index===13 && j===2) fillPreset(row, preset120);
+        if(index===13 && j===3) fillPreset(row, preset121);
+        if(index===13 && j===4) fillPreset(row, preset122);
+        if(index===13 && j===5) fillPreset(row, preset123);
+        if(index===13 && j===6) fillPreset(row, preset124);
+        if(index===13 && j===7) fillPreset(row, preset125);
+        if(index===13 && j===8) fillPreset(row, preset126);
+        // Bilhete 15
+        if(index===14 && j===0) fillPreset(row, preset127);
+        if(index===14 && j===1) fillPreset(row, preset128);
+        if(index===14 && j===2) fillPreset(row, preset129);
+        if(index===14 && j===3) fillPreset(row, preset130);
+        if(index===14 && j===4) fillPreset(row, preset131);
+        if(index===14 && j===5) fillPreset(row, preset132);
+        if(index===14 && j===6) fillPreset(row, preset133);
+        if(index===14 && j===7) fillPreset(row, preset134);
+        if(index===14 && j===8) fillPreset(row, preset135);
+        // Bilhete 16
+        if(index===15 && j===0) fillPreset(row, preset136);
+        if(index===15 && j===1) fillPreset(row, preset137);
+        if(index===15 && j===2) fillPreset(row, preset138);
+        if(index===15 && j===3) fillPreset(row, preset139);
+        if(index===15 && j===4) fillPreset(row, preset140);
+        if(index===15 && j===5) fillPreset(row, preset141);
+        if(index===15 && j===6) fillPreset(row, preset142);
+        if(index===15 && j===7) fillPreset(row, preset143);
+        if(index===15 && j===8) fillPreset(row, preset144);
+        // Bilhete 17
+        if(index===16 && j===0) fillPreset(row, preset145);
+        if(index===16 && j===1) fillPreset(row, preset146);
+        if(index===16 && j===2) fillPreset(row, preset147);
+        if(index===16 && j===3) fillPreset(row, preset148);
+        if(index===16 && j===4) fillPreset(row, preset149);
+        if(index===16 && j===5) fillPreset(row, preset150);
+        if(index===16 && j===6) fillPreset(row, preset151);
+        if(index===16 && j===7) fillPreset(row, preset152);
+        if(index===16 && j===8) fillPreset(row, preset153);
+        // Bilhete 18
+        if(index===17 && j===0) fillPreset(row, preset154);
+        if(index===17 && j===1) fillPreset(row, preset155);
+        if(index===17 && j===2) fillPreset(row, preset156);
+        if(index===17 && j===3) fillPreset(row, preset157);
+        if(index===17 && j===4) fillPreset(row, preset158);
+        if(index===17 && j===5) fillPreset(row, preset159);
+        if(index===17 && j===6) fillPreset(row, preset160);
+        if(index===17 && j===7) fillPreset(row, preset161);
+        if(index===17 && j===8) fillPreset(row, preset162);
+        // Bilhete 19
+        if(index===18 && j===0) fillPreset(row, preset163);
+        if(index===18 && j===1) fillPreset(row, preset164);
+        if(index===18 && j===2) fillPreset(row, preset165);
+        if(index===18 && j===3) fillPreset(row, preset166);
+        if(index===18 && j===4) fillPreset(row, preset167);
+        if(index===18 && j===5) fillPreset(row, preset168);
+        if(index===18 && j===6) fillPreset(row, preset169);
+        if(index===18 && j===7) fillPreset(row, preset170);
+        if(index===18 && j===8) fillPreset(row, preset171);
+        // Bilhete 20
+        if(index===19 && j===0) fillPreset(row, preset172);
+        if(index===19 && j===1) fillPreset(row, preset173);
+        if(index===19 && j===2) fillPreset(row, preset174);
+        if(index===19 && j===3) fillPreset(row, preset175);
+        if(index===19 && j===4) fillPreset(row, preset176);
+        if(index===19 && j===5) fillPreset(row, preset177);
+        if(index===19 && j===6) fillPreset(row, preset178);
+        if(index===19 && j===7) fillPreset(row, preset179);
+        if(index===19 && j===8) fillPreset(row, preset180);
+        // Bilhete 21
+        if(index===20 && j===0) fillPreset(row, preset181);
+        if(index===20 && j===1) fillPreset(row, preset182);
+        if(index===20 && j===2) fillPreset(row, preset183);
+        if(index===20 && j===3) fillPreset(row, preset184);
+        if(index===20 && j===4) fillPreset(row, preset185);
+        if(index===20 && j===5) fillPreset(row, preset186);
+        if(index===20 && j===6) fillPreset(row, preset187);
+        if(index===20 && j===7) fillPreset(row, preset188);
+        if(index===20 && j===8) fillPreset(row, preset189);
+        // Bilhete 22
+        if(index===21 && j===0) fillPreset(row, preset190);
+        if(index===21 && j===1) fillPreset(row, preset191);
+        if(index===21 && j===2) fillPreset(row, preset192);
+        if(index===21 && j===3) fillPreset(row, preset193);
+        if(index===21 && j===4) fillPreset(row, preset194);
+        if(index===21 && j===5) fillPreset(row, preset195);
+        if(index===21 && j===6) fillPreset(row, preset196);
+        if(index===21 && j===7) fillPreset(row, preset197);
+        if(index===21 && j===8) fillPreset(row, preset198);
+        // Bilhete 23
+        if(index===22 && j===0) fillPreset(row, preset199);
+        if(index===22 && j===1) fillPreset(row, preset200);
+        if(index===22 && j===2) fillPreset(row, preset201);
+        if(index===22 && j===3) fillPreset(row, preset202);
+        if(index===22 && j===4) fillPreset(row, preset203);
+        if(index===22 && j===5) fillPreset(row, preset204);
+        if(index===22 && j===6) fillPreset(row, preset205);
+        if(index===22 && j===7) fillPreset(row, preset206);
+        if(index===22 && j===8) fillPreset(row, preset207);
+        // Bilhete 24
+        if(index===23 && j===0) fillPreset(row, preset208);
+        if(index===23 && j===1) fillPreset(row, preset209);
+        if(index===23 && j===2) fillPreset(row, preset210);
+        if(index===23 && j===3) fillPreset(row, preset211);
+        if(index===23 && j===4) fillPreset(row, preset212);
+        if(index===23 && j===5) fillPreset(row, preset213);
+        if(index===23 && j===6) fillPreset(row, preset214);
+        if(index===23 && j===7) fillPreset(row, preset215);
+        if(index===23 && j===8) fillPreset(row, preset216);  
+        // Bilhete 25
+        if(index===24 && j===0) fillPreset(row, preset217);
+        if(index===24 && j===1) fillPreset(row, preset218);
+        if(index===24 && j===2) fillPreset(row, preset219);
+        if(index===24 && j===3) fillPreset(row, preset220);
+        if(index===24 && j===4) fillPreset(row, preset221);
+        if(index===24 && j===5) fillPreset(row, preset222);
+        if(index===24 && j===6) fillPreset(row, preset223);
+        if(index===24 && j===7) fillPreset(row, preset224);
+        if(index===24 && j===8) fillPreset(row, preset225);
+        // Bilhete 26
+        if(index===25 && j===0) fillPreset(row, preset226);
+        if(index===25 && j===1) fillPreset(row, preset227);
+        if(index===25 && j===2) fillPreset(row, preset228);
+        if(index===25 && j===3) fillPreset(row, preset229);
+        if(index===25 && j===4) fillPreset(row, preset230);
+        if(index===25 && j===5) fillPreset(row, preset231);
+        if(index===25 && j===6) fillPreset(row, preset232);
+        if(index===25 && j===7) fillPreset(row, preset233);
+        if(index===25 && j===8) fillPreset(row, preset234);
+        // Bilhete 27
+        if(index===26 && j===0) fillPreset(row, preset235);
+        if(index===26 && j===1) fillPreset(row, preset236);
+        if(index===26 && j===2) fillPreset(row, preset237);
+        if(index===26 && j===3) fillPreset(row, preset238);
+        if(index===26 && j===4) fillPreset(row, preset239);
+        if(index===26 && j===5) fillPreset(row, preset240);
+        if(index===26 && j===6) fillPreset(row, preset241);
+        if(index===26 && j===7) fillPreset(row, preset242);
+        if(index===26 && j===8) fillPreset(row, preset243);
+        // Bilhete 28
+        if(index===27 && j===0) fillPreset(row, preset244);
+        if(index===27 && j===1) fillPreset(row, preset245);
+        if(index===27 && j===2) fillPreset(row, preset246);
+        if(index===27 && j===3) fillPreset(row, preset247);
+        if(index===27 && j===4) fillPreset(row, preset248);
+        if(index===27 && j===5) fillPreset(row, preset249);
+        if(index===27 && j===6) fillPreset(row, preset250);
+        if(index===27 && j===7) fillPreset(row, preset251);
+        if(index===27 && j===8) fillPreset(row, preset252);
+        // Bilhete 29
+        if(index===28 && j===0) fillPreset(row, preset253);
+        if(index===28 && j===1) fillPreset(row, preset254);
+        if(index===28 && j===2) fillPreset(row, preset255);
+        if(index===28 && j===3) fillPreset(row, preset256);
+        if(index===28 && j===4) fillPreset(row, preset257);
+        if(index===28 && j===5) fillPreset(row, preset258);
+        if(index===28 && j===6) fillPreset(row, preset259);
+        if(index===28 && j===7) fillPreset(row, preset260);
+        if(index===28 && j===8) fillPreset(row, preset261);
+        // Bilhete 30
+        if(index===29 && j===0) fillPreset(row, preset262);
+        if(index===29 && j===1) fillPreset(row, preset263);
+        if(index===29 && j===2) fillPreset(row, preset264);
+        if(index===29 && j===3) fillPreset(row, preset265);
+        if(index===29 && j===4) fillPreset(row, preset266);
+        if(index===29 && j===5) fillPreset(row, preset267);
+        if(index===29 && j===6) fillPreset(row, preset268);
+        if(index===29 && j===7) fillPreset(row, preset269);
+        if(index===29 && j===8) fillPreset(row, preset270);
+        // Bilhete 31
+        if(index===30 && j===0) fillPreset(row, preset271);
+        if(index===30 && j===1) fillPreset(row, preset272);
+        if(index===30 && j===2) fillPreset(row, preset273);
+        if(index===30 && j===3) fillPreset(row, preset274);
+        if(index===30 && j===4) fillPreset(row, preset275);
+        if(index===30 && j===5) fillPreset(row, preset276);
+        if(index===30 && j===6) fillPreset(row, preset277);
+        if(index===30 && j===7) fillPreset(row, preset278);
+        if(index===30 && j===8) fillPreset(row, preset279);
+        // Bilhete 32
+        if(index===31 && j===0) fillPreset(row, preset280);
+        if(index===31 && j===1) fillPreset(row, preset281);
+        if(index===31 && j===2) fillPreset(row, preset282);
+        if(index===31 && j===3) fillPreset(row, preset283);
+        if(index===31 && j===4) fillPreset(row, preset284);
+        if(index===31 && j===5) fillPreset(row, preset285);
+        if(index===31 && j===6) fillPreset(row, preset286);
+        if(index===31 && j===7) fillPreset(row, preset287);
+        if(index===31 && j===8) fillPreset(row, preset288);
+        // Bilhete 33
+        if(index===32 && j===0) fillPreset(row, preset289);
+        if(index===32 && j===1) fillPreset(row, preset290);
+        if(index===32 && j===2) fillPreset(row, preset291);
+        if(index===32 && j===3) fillPreset(row, preset292);
+        if(index===32 && j===4) fillPreset(row, preset293);
+        if(index===32 && j===5) fillPreset(row, preset294);
+        if(index===32 && j===6) fillPreset(row, preset295);
+        if(index===32 && j===7) fillPreset(row, preset296);
+        if(index===32 && j===8) fillPreset(row, preset297);
+        // Bilhete 34
+        if(index===33 && j===0) fillPreset(row, preset298);
+        if(index===33 && j===1) fillPreset(row, preset299);
+        if(index===33 && j===2) fillPreset(row, preset300);
+        if(index===33 && j===3) fillPreset(row, preset301);
+        if(index===33 && j===4) fillPreset(row, preset302);
+        if(index===33 && j===5) fillPreset(row, preset303);
+        if(index===33 && j===6) fillPreset(row, preset304);
+        if(index===33 && j===7) fillPreset(row, preset305);
+        if(index===33 && j===8) fillPreset(row, preset306);
+        // Bilhete 35
+        if(index===34 && j===0) fillPreset(row, preset307);
+        if(index===34 && j===1) fillPreset(row, preset308);
+        if(index===34 && j===2) fillPreset(row, preset309);
+        if(index===34 && j===3) fillPreset(row, preset310);
+        if(index===34 && j===4) fillPreset(row, preset311);
+        if(index===34 && j===5) fillPreset(row, preset312);
+        if(index===34 && j===6) fillPreset(row, preset313);
+        if(index===34 && j===7) fillPreset(row, preset314);
+        if(index===34 && j===8) fillPreset(row, preset315);
+        // Bilhete 36
+        if(index===35 && j===0) fillPreset(row, preset289);
+        if(index===35 && j===1) fillPreset(row, preset290);
+        if(index===35 && j===2) fillPreset(row, preset291);
+        if(index===35 && j===3) fillPreset(row, preset292);
+        if(index===35 && j===4) fillPreset(row, preset293);
+        if(index===35 && j===5) fillPreset(row, preset294);
+        if(index===35 && j===6) fillPreset(row, preset295);
+        if(index===35 && j===7) fillPreset(row, preset296);
+        if(index===35 && j===8) fillPreset(row, preset297);
+        // Bilhete 37
+        if(index===36 && j===0) fillPreset(row, preset298);
+        if(index===36 && j===1) fillPreset(row, preset299);
+        if(index===36 && j===2) fillPreset(row, preset300);
+        if(index===36 && j===3) fillPreset(row, preset301);
+        if(index===36 && j===4) fillPreset(row, preset302);
+        if(index===36 && j===5) fillPreset(row, preset303);
+        if(index===36 && j===6) fillPreset(row, preset304);
+        if(index===36 && j===7) fillPreset(row, preset305);
+        if(index===36 && j===8) fillPreset(row, preset306);
+        // Bilhete 38
+        if(index===37 && j===0) fillPreset(row, preset307);
+        if(index===37 && j===1) fillPreset(row, preset308);
+        if(index===37 && j===2) fillPreset(row, preset309);
+        if(index===37 && j===3) fillPreset(row, preset310);
+        if(index===37 && j===4) fillPreset(row, preset311);
+        if(index===37 && j===5) fillPreset(row, preset312);
+        if(index===37 && j===6) fillPreset(row, preset313);
+        if(index===37 && j===7) fillPreset(row, preset314);
+        if(index===37 && j===8) fillPreset(row, preset315);
+          
+        if(index===38 && j===0) fillPreset(row, preset316);
+        if(index===38 && j===1) fillPreset(row, preset317);
+          
+          
+          
+        card.appendChild(row);
+      }
+
+      return card;
+    }
+
+    function fillPreset(row, arr){
+      const fields = row.querySelectorAll('input');
+      arr.forEach((n,i)=> fields[i].value = n);
+    }
+
+    const container = document.getElementById('tickets');
+    const frag = document.createDocumentFragment();
+    for(let i=0;i<NUM_TICKETS;i++) frag.appendChild(createTicket(i));
+    container.appendChild(frag);
+
+    // Conferência
+    document.getElementById('checkBtn').onclick = () => {
+      const draw = [...document.querySelectorAll('.draw')]
+                   .map(i=>parseInt(i.value))
+                   .filter(n=>!isNaN(n));
+      if(draw.length!==6){ alert('Digite 6 números válidos.'); return; }
+
+      const drawSet = new Set(draw);
+
+      document.querySelectorAll('.ticket').forEach(ticket => {
+        let total = 0;
+        ticket.querySelectorAll('.game').forEach(game => {
+          let m = 0;
+          game.querySelectorAll('input').forEach(inp => {
+            const v = parseInt(inp.value);
+            inp.classList.remove('match');
+            if(drawSet.has(v)){ inp.classList.add('match'); m++; }
+          });
+          game.parentElement.querySelector('.gm').textContent = m;
+          total += m;
+        });
+        ticket.querySelector('.ticket-total').textContent = total;
+      });
+    }
+
+    document.getElementById('resetBtn').onclick = () => {
+      document.querySelectorAll('.match').forEach(e=>e.classList.remove('match'));
+      document.querySelectorAll('.gm').forEach(e=>e.textContent='0');
+      document.querySelectorAll('.ticket-total').forEach(e=>e.textContent='0');
+    }
+  </script>
+
+</body>
+</html>
