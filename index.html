@@ -977,7 +977,7 @@
       const draw = [...document.querySelectorAll('.draw')]
                    .map(i=>parseInt(i.value))
                    .filter(n=>!isNaN(n));
-      if(draw.length!==6){ alert('Digite 6 números válidos.'); return; }
+      if(draw.length!==12){ alert('Digite 12 números válidos.'); return; }
 
       const drawSet = new Set(draw);
 
@@ -1007,6 +1007,7 @@
 </body>
 
 </html>
+
 
 
 
